@@ -1,102 +1,150 @@
 import os
-import venv
 import subprocess
 import sys
 import winreg
+from winreg import HKEYType
+
+import tkinter
 
 
-def is_python_installed():
-    try:
-        subprocess.check_output(['python', '--version'])
-        return True
-    except subprocess.CalledProcessError:
-        return False
-    except FileNotFoundError:
-        return False
+def global_python() -> str | None:
+    if os.name != 'nt':
+        print('Это программа предназначена только для Windows')
+        print('Программа завершает свою работу')
+        exit()
+
+    # Открытие ключей реестра
+    user_key: HKEYType = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 'SOFTWARE')
+    machine_key: HKEYType = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE')
+
+    key_index: int = -1
+    find_python: str = 'not'
+
+    while True:
+        key_index += 1
+
+        try:
+            # Перебор подключей
+            user_subkey: str = winreg.EnumKey(user_key, key_index)
+            machine_subkey: str = winreg.EnumKey(machine_key, key_index)
+
+            if user_subkey == 'Python':
+                find_python: str = 'user'
+                break
+
+            elif machine_subkey == 'Python':
+                find_python: str = 'machine'
+                break
+
+        except OSError:
+            # Подключей больше нет
+            break
+
+    # Закрытие ключей
+    winreg.CloseKey(user_key)
+    winreg.CloseKey(machine_key)
+    return find_python
 
 
-if is_python_installed():
-    print("Python установлен.")
-else:
-    print("Python не установлен.")
+def python_versions(location: str) -> list[str]:
+
+    sub_key = 'SOFTWARE\\Python\\PythonCore\\'
+
+    if location == 'not':
+        print('На данной машине отсутствует установленный интерпретатор Python')
+        print('Программа завершает свою работу')
+        exit()
+
+    elif location == 'user':
+        main_key: HKEYType = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key)
+
+    elif location == 'machine':
+        main_key: HKEYType = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key)
+
+        py_index = -1
+        py_version = []
+
+        while True:
+            py_index += 1
+
+            try:
+                # Перечисляем подключи
+                version_name: str = winreg.EnumKey(main_key, py_index)
+                py_version.append(version_name)
+
+            except OSError:
+                # Подключей больше нет
+                break
+
+        # Закрываем ключ реестра
+        winreg.CloseKey(main_key)
+        return py_version
 
 
+def python_paths(location: str, py_vers: list[str]) -> dict[str, str]:
+
+    folder_key: HKEYType = winreg.REG_NONE()
+    result_dict: dict[str, str] = {}
+
+    for one_key in py_vers:
+
+        sub_key: str = f'SOFTWARE\\Python\\PythonCore\\{one_key}\\InstallPath'
+
+        if location == 'user':
+            folder_key: HKEYType = winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key, 0, winreg.KEY_READ)
+        elif location == 'machine':
+            folder_key: HKEYType = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, sub_key, 0, winreg.KEY_READ)
+
+        python_folder, _ = winreg.QueryValueEx(folder_key, '')
+        result_dict[one_key]: str = python_folder
+
+    # Закрываем ключ реестра
+    winreg.CloseKey(folder_key)
+    return result_dict
 
 
+def virtual_env(python_path: str, venv_name: str) -> None:
 
+    # вместо os.getcwd() надо запросить у пользователя расположение через
+    # метод tkinter: from tkinter.filedialog import askdirectory as ask_path
+    #
+    # Функция для получения пути к папке c виртуальным окружением
+    # def get_path() -> Path:
+    #     path: str = ask_path(title='new venv - Выберите папку', initialdir=os.getcwd())
+    #
+    #     if not path:
+    #         print('В меню выбора папки была нажата кнопка "Отмена"')
+    #         input('\nДля завершения программы нажмите Enter')
+    #         exit()
+    #
+    #     return Path(path) -> пока буду обозначать как os.getcwd()
 
+    venv_path: str = os.path.join(os.getcwd(), venv_name)
 
+    if not os.path.exists(venv_path):
+        os.makedirs(venv_path)
 
-
-
-
-
-
-def create_virtual_environment(env_name) -> None:
-
-    env_path: str = os.path.join(os.getcwd(), env_name)
-
+    subprocess.check_call([python_path, '-m', 'venv', venv_path])
     # Создаем виртуальное окружение
-    venv.create(env_path, with_pip=True)
-    print(f'Виртуальное окружение {env_name} создано в {env_path}')
+
+    print(f'Виртуальное окружение {venv_name} создано в {os.getcwd()}')
 
     # Определяем путь к pip в виртуальном окружении
-    if os.name == 'nt':
-        pip_executable = os.path.join(env_path, 'Scripts', 'pip')
-    else:
-        pip_executable = os.path.join(env_path, 'bin', 'pip')
+    pip_exe = os.path.join(venv_path, 'Scripts', 'pip')
 
     # Устанавливаем или обновляем pip, setuptools и wheel
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
-    subprocess.check_call([pip_executable, 'install', '--upgrade', 'setuptools', 'wheel'])
+    subprocess.check_call([pip_exe, 'install', '--upgrade', 'setuptools', 'wheel'])
 
 
 if __name__ == "__main__":
 
-    is_python_installed()
+    py_key: str = global_python()
+    py_ver: list[str] = python_versions(py_key)
+    py_path: dict[str, str] = python_paths(py_key, py_ver)
 
-    # key_read = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Python\\PythonCore\\3.13\\InstallPath', 0, winreg.KEY_READ)
-    # python_folder, regtype = winreg.QueryValueEx(key_read, '')
+    print(py_key)
+    print(py_ver)
 
-    # Путь к Python из реестра Windows
-    key_read = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Python\\PythonCore\\')
-
-    index = 0
-    versions = []
-    while True:
-        try:
-            # Перечисляем подключи
-            subkey_name = winreg.EnumKey(key_read, index)
-            versions.append(subkey_name)
-            index += 1
-        except OSError:
-            # Когда больше нет подключей, будет выброшено исключение
-            break
-        # Закрываем ключ реестра
-        winreg.CloseKey(key_read)
-
-        # Получаем список версий Python
-        print("Установленные версии Python:", versions)
-
-
-    # Удалите пути виртуального окружения из PATH
-    # Это может потребовать корректировки для вашей конкретной ситуации
-    # venv_path = '/path/to/your/venv/bin'
-    # os.environ['PATH'] = os.pathsep.join(
-    #         p for p in os.environ['PATH'].split(os.pathsep) if not p.startswith(venv_path)
-    # )
-    #
-    # try:
-    #     # Найдите системный Python
-    #     system_python = subprocess.check_output(['which', 'python']).decode().strip()
-    #     print(f"Системный Python: {system_python}")
-    # finally:
-    #     # Восстановите оригинальный PATH
-    #     os.environ['PATH'] = original_path
-
-
-    # Задаем имя виртуального окружения
-    # env_name = "myenv"
-
-    # Создаем виртуальное окружение и устанавливаем необходимые пакеты
-    # create_virtual_environment(env_name)
+    for item_key, item_value in py_path.items():
+        print(f'version: {item_key} | path: {item_value}')
