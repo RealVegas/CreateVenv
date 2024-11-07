@@ -4,8 +4,6 @@ import sys
 import winreg
 from winreg import HKEYType
 
-import tkinter
-
 
 def global_python() -> str | None:
     if os.name != 'nt':
