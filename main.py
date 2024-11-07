@@ -14,6 +14,7 @@ def is_python_installed():
     except FileNotFoundError:
         return False
 
+
 if is_python_installed():
     print("Python установлен.")
 else:
@@ -48,6 +49,7 @@ def create_virtual_environment(env_name) -> None:
     # Устанавливаем или обновляем pip, setuptools и wheel
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
     subprocess.check_call([pip_executable, 'install', '--upgrade', 'setuptools', 'wheel'])
+
 
 if __name__ == "__main__":
 
