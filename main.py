@@ -53,6 +53,9 @@ if __name__ == "__main__":
 
     is_python_installed()
 
+    # key_read = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Python\\PythonCore\\3.13\\InstallPath', 0, winreg.KEY_READ)
+    # python_folder, regtype = winreg.QueryValueEx(key_read, '')
+
     # Путь к Python из реестра Windows
     key_read = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Python\\PythonCore\\')
 
