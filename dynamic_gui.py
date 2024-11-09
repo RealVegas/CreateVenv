@@ -20,16 +20,21 @@ def apply_style():
         ),
         'TEntry': dict(
             configure={'background': '#282828',
-                       'fieldbackground': '#323232',
+                       'fieldbackground': '#282828',
                        'foreground': '#FFFFFF',
                        'relief': 'flat'}
         ),
         'TButton': dict(
-                configure={'background': '#323232',
-                           'relief': 'solid',
-                           'foreground': '#FFFFFF',
-
-                           }
+            configure={
+                'borderwidth': '1',
+                'relief': 'solid',
+                'font': ('Arial', 11),
+                'foreground': '#FFFFFF',
+            },
+            map={
+                'background': [('!active', '#282828'), ('active', '#323232')],
+                'foreground': [('!active', '#FFFFFF'), ('active', '#FFFFFF')],
+            }
         )
     })
 
@@ -37,6 +42,7 @@ def apply_style():
 # Создание окна
 root: tk = tk.Tk()
 root.title('Создание Python virtual environment GUI')
+root.tk.call('tk', 'scaling', 1.0)
 
 # Ширина и высота окна
 win_width = 640
@@ -57,7 +63,7 @@ apply_style()
 # for style_name, style_properties in styles.items():
 #     style.configure(style_name, **style_properties)
 
-icon = PhotoImage(file='icons/main_icon.png')
+icon = PhotoImage(file='images/main_icon.png')
 root.iconphoto(False, icon)
 
 frame: ttk = ttk.Frame(root)
