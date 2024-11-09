@@ -8,44 +8,31 @@ def apply_style():
     style = ttk.Style()
 
     style.theme_use('clam')
+
     style.theme_settings('clam', settings={
-       'TFrame': {
-            'configure': {
-                'background': '#282828'
-                }
-             },
-        'TLabel': {
-                'configure': {
-                    'background': '#282828',
-                    'foreground': '#FFFFFF',
-                    'font': ('Arial', 11)
-            }
-        },
-        'TEntry': {
-            'configure': {
-                'background': '#333333',
-                'fieldbackground': '#333333',
-                'foreground': '#FFFFFF',
-                'borderwidth': '3',
-                'relief': 'flat'
-            },
+        'TFrame': dict(
+            configure={'background': '#282828'}
+        ),
+        'TLabel': dict(
+            configure={'background': '#282828',
+                       'foreground': '#FFFFFF',
+                       'font': ('Arial', 11)}
+        ),
+        'TEntry': dict(
+            configure={'background': '#282828',
+                       'fieldbackground': '#323232',
+                       'foreground': '#FFFFFF',
+                       'relief': 'flat'}
+        ),
+        'TButton': dict(
+                configure={'background': '#323232',
+                           'relief': 'solid',
+                           'foreground': '#FFFFFF',
 
-       'TButton': {
-           'configure': {
-                'borderwidth': '3',
-                'relief': 'ridge',
-                'font': ('Arial', 11),
-                'background': '#282828',
-                'foreground': '#FFFFFF'
-                },
-            'map': {
-                'background': [('!active', '#000000'), ('active', '#000000')],
-                'foreground': [('!active', '#000000'), ('active', '#000000')],
-                }
-            },
-
-        }
+                           }
+        )
     })
+
 
 # Создание окна
 root: tk = tk.Tk()
@@ -77,8 +64,6 @@ frame: ttk = ttk.Frame(root)
 frame.pack(fill=tk.BOTH, expand=True)
 
 # Добавление виджетов
-
-# Добавление виджетов
 path_label: ttk = ttk.Label(frame, text='Задайте размещение нового виртуального окружения', anchor='center')
 path_label.place(x=120, y=5, width=400, height=22)
 
@@ -87,7 +72,7 @@ task_font: tuple[str, int] = ('Arial', 11)  # через стили в settings=
 task_entry = ttk.Entry(frame, font=task_font)
 task_entry.place(x=5, y=30, width=600, height=25)
 
-add_button: ttk = ttk.Button(frame)
+add_button: ttk = ttk.Button(frame, text='...')
 add_button.place(x=610, y=30, width=25, height=25)
 
 
