@@ -1,9 +1,118 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import PhotoImage
+from tkinter.filedialog import askdirectory as ask_path
 
-root = tk.Tk()
-root.title("Python GUI - Radiobutton")
-root.geometry("640x480+300+300")
-root.resizable(False, False)
+# Задание стилей для виджетов
+def apply_style():
+    style = ttk.Style()
+
+    style.theme_use('clam')
+    style.theme_settings('clam', settings={
+       'TFrame': {
+            'configure': {
+                'background': '#282828'
+                }
+             },
+        'TLabel': {
+                'configure': {
+                    'background': '#282828',
+                    'foreground': '#FFFFFF',
+                    'font': ('Arial', 11)
+            }
+        },
+        'TEntry': {
+            'configure': {
+                'background': '#333333',
+                'fieldbackground': '#333333',
+                'foreground': '#FFFFFF',
+                'borderwidth': '3',
+                'relief': 'flat'
+            },
+
+       'TButton': {
+           'configure': {
+                'borderwidth': '3',
+                'relief': 'ridge',
+                'font': ('Arial', 11),
+                'background': '#282828',
+                'foreground': '#FFFFFF'
+                },
+            'map': {
+                'background': [('!active', '#000000'), ('active', '#000000')],
+                'foreground': [('!active', '#000000'), ('active', '#000000')],
+                }
+            },
+
+        }
+    })
+
+# Создание окна
+root: tk = tk.Tk()
+root.title('Создание Python virtual environment GUI')
+
+# Ширина и высота окна
+win_width = 640
+win_height = 480
+
+scr_width = root.winfo_screenwidth()
+scr_height = root.winfo_screenheight()
+
+# Вычисляем координаты для размещения окна в центре
+x_pos = (scr_width // 2) - (win_width // 2)
+y_pos = (scr_height // 2) - (win_height // 2)
+
+# Устанавливаем размер и положение окна
+root.geometry(f'{win_width}x{win_height}+{x_pos}+{y_pos}')
+
+apply_style()
+
+# for style_name, style_properties in styles.items():
+#     style.configure(style_name, **style_properties)
+
+icon = PhotoImage(file='icons/main_icon.png')
+root.iconphoto(False, icon)
+
+frame: ttk = ttk.Frame(root)
+frame.pack(fill=tk.BOTH, expand=True)
+
+# Добавление виджетов
+
+# Добавление виджетов
+path_label: ttk = ttk.Label(frame, text='Задайте размещение нового виртуального окружения', anchor='center')
+path_label.place(x=120, y=5, width=400, height=22)
+
+task_font: tuple[str, int] = ('Arial', 11)  # через стили в settings={} не работало не смог понять почему
+
+task_entry = ttk.Entry(frame, font=task_font)
+task_entry.place(x=5, y=30, width=600, height=25)
+
+add_button: ttk = ttk.Button(frame)
+add_button.place(x=610, y=30, width=25, height=25)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 root.mainloop()
