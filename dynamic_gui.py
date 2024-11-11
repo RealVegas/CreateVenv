@@ -1,52 +1,32 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import PhotoImage
-from tkinter.filedialog import askdirectory as ask_path
 
-# Задание стилей для виджетов
-def apply_style():
-    style = ttk.Style()
 
-    style.theme_use('clam')
+# from tkinter import ttk
+# from tkinter import PhotoImage
+# from tkinter import I
+# from tkinter.filedialog import askdirectory as ask_path
 
-    style.theme_settings('clam', settings={
-        'TFrame': dict(
-            configure={'background': '#282828'}
-        ),
-        'TLabel': dict(
-            configure={'background': '#282828',
-                       'foreground': '#FFFFFF',
-                       'font': ('Arial', 11)}
-        ),
-        'TEntry': dict(
-            configure={'background': '#282828',
-                       'fieldbackground': '#282828',
-                       'foreground': '#FFFFFF',
-                       'relief': 'flat'}
-        ),
-        'TButton': dict(
-            configure={
-                'borderwidth': '1',
-                'relief': 'solid',
-                'font': ('Arial', 11),
-                'foreground': '#FFFFFF',
-            },
-            map={
-                'background': [('!active', '#282828'), ('active', '#323232')],
-                'foreground': [('!active', '#FFFFFF'), ('active', '#FFFFFF')],
-            }
-        )
-    })
+
+def on_action(event):
+    if event.type == tk.EventType.Enter:
+        label.config(image=ask_dir_act)
+    elif event.type == tk.EventType.Leave:
+        label.config(image=ask_dir_inact)
+    elif event.type == tk.EventType.ButtonPress:
+        label.config(image=ask_dir_press)
+    elif event.type == tk.EventType.ButtonRelease:
+        label.config(image=ask_dir_act)
 
 
 # Создание окна
 root: tk = tk.Tk()
-root.title('Создание Python virtual environment GUI')
-# root.tk.call('tk', 'scaling', 1.0)
+root.title('Python virtual environment maker v.1.0')
+root.resizable(False, False)
+root.tk.call('tk', 'scaling', 1.0)
 
 # Размещение окна в центре экрана
 win_width = 800
-win_height = 335
+win_height = 220
 
 scr_width = root.winfo_screenwidth()
 scr_height = root.winfo_screenheight()
@@ -56,22 +36,33 @@ y_pos = (scr_height // 2) - (win_height // 2)
 
 root.geometry(f'{win_width}x{win_height}+{x_pos}+{y_pos}')
 
-# Иконка окна
-icon = PhotoImage(file='images/main_icon.png')
+# Иконка окна и фоновое изображение
+icon = tk.PhotoImage(file='images/main_icon.png')
+background = tk.PhotoImage(file='images/background.png')
+
+# Установка иконки и фона
 root.iconphoto(False, icon)
 
-# Фоновое изображение
-background = PhotoImage(file='images/background.png')
+backdrop_canvas = tk.Canvas(root, width=800, height=220)
+backdrop_canvas.pack(fill='both', expand=True)
+backdrop_canvas.create_image(0, 0, image=background, anchor="nw")
 
-canvas = tk.Canvas(root, width=800, height=335)
-canvas.pack(fill="both", expand=True)
+# Загрузка элементов интерфейса
+ask_dir_inact = tk.PhotoImage(file='images/buttons/askdir_inact.png')
+ask_dir_act = tk.PhotoImage(file='images/buttons/askdir_act.png')
+ask_dir_press = tk.PhotoImage(file='images/buttons/askdir_press.png')
 
-# Установите изображение в холст
-canvas.create_image(0, 0, image=background, anchor="nw")
+label = tk.Label(root, image=ask_dir_inact, borderwidth=0)
 
 
+label.bind("<Enter>", on_action)
+label.bind("<Leave>", on_action)
+label.bind("<ButtonPress-1>", on_action)
+label.bind("<ButtonRelease-1>", on_action)
 
+# Создание кнопки
 
+label.place(x=768, y=15)
 
 
 # frame.create_image(0, 0, image=bkg, anchor='nw')
@@ -86,32 +77,4 @@ canvas.create_image(0, 0, image=background, anchor="nw")
 # task_entry = ttk.Entry(frame, font=task_font)
 # task_entry.place(x=5, y=30, width=600, height=25)
 #
-# add_button: ttk = ttk.Button(frame, text='...')
-# add_button.place(x=610, y=30, width=25, height=25)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 root.mainloop()
